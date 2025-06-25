@@ -38,23 +38,27 @@ class FilamentIntercomPlugin implements Plugin
 
     protected function getIntercomSettings(): array
     {
-        $user = auth()->user();
-
-        $userData = [
-            'user_id' => $user->getKey(),
-            'name' => $user->name,
-            'email' => $user->email,
-            'created_at' => $user->created_at->timestamp,
-        ];
-
-        if ($user instanceof IntercomUser) {
-            $userData = array_merge($userData, $user->getIntercomUserData());
-        }
-
-        return array_merge([
+        $settings = [
             'api_base' => config('services.intercom.api_base', 'https://api-iam.intercom.io'),
             'app_id' => config('services.intercom.app_id'),
-        ], $userData);
+        ];
+
+        if ($user = auth()->user()) {
+            $userData = [
+                'user_id' => $user->getKey(),
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at->timestamp,
+            ];
+
+            if ($user instanceof IntercomUser) {
+                $userData = array_merge($userData, $user->getIntercomUserData());
+            }
+
+            return array_merge($settings, $userData);
+        }
+
+        return $settings;
     }
 
     public function boot(Panel $panel): void
